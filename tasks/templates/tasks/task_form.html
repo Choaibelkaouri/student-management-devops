@@ -1,0 +1,103 @@
+{% extends "tasks/base.html" %}
+{% block title %}{% if task %}Edit Task{% else %}Create Task{% endif %}{% endblock %}
+{% block nav_create %}{% if not task %}active{% endif %}{% endblock %}
+{% block nav_tasks %}{% if task %}active{% endif %}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2" style="font-size:.85rem">
+            <li class="breadcrumb-item"><a href="/tasks/" style="color:var(--tm-primary);text-decoration:none">Tasks</a></li>
+            <li class="breadcrumb-item active">{% if task %}Edit Task{% else %}New Task{% endif %}</li>
+        </ol>
+    </nav>
+    <h1 class="tm-page-title">{% if task %}Edit Task{% else %}Create New Task{% endif %}</h1>
+    <p class="tm-page-subtitle">{% if task %}Update the details of your task{% else %}Fill in the details to create a new task{% endif %}</p>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="tm-card p-4">
+            {% if form.errors %}
+            <div class="alert alert-danger alert-dismissible fade show mb-4" style="font-size:.85rem;border-radius:10px">
+                <strong>Please fix the errors below:</strong>
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}<div>{{ error }}</div>{% endfor %}
+                {% endfor %}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{% if task %}/tasks/{{ task.id }}/edit/{% else %}/tasks/create/{% endif %}">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label for="title" class="form-label">Task Title <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="title" name="title"
+                           value="{% if task %}{{ task.title }}{% endif %}"
+                           placeholder="Enter task title" required>
+                </div>
+
+                <div class="mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="5"
+                              placeholder="Describe your task in detail…">{% if task %}{{ task.description }}{% endif %}</textarea>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-4">
+                        <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="pending" {% if task.status == "pending" %}selected{% endif %}>Pending</option>
+                            <option value="in_progress" {% if task.status == "in_progress" %}selected{% endif %}>In Progress</option>
+                            <option value="completed" {% if task.status == "completed" %}selected{% endif %}>Completed</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="priority" class="form-label">Priority <span class="text-danger">*</span></label>
+                        <select class="form-select" id="priority" name="priority" required>
+                            <option value="low" {% if task.priority == "low" %}selected{% endif %}>Low</option>
+                            <option value="medium" {% if task.priority == "medium" %}selected{% endif %}>Medium</option>
+                            <option value="high" {% if task.priority == "high" %}selected{% endif %}>High</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="due_date" class="form-label">Due Date</label>
+                        <input type="date" class="form-control" id="due_date" name="due_date"
+                               value="{% if task %}{{ task.due_date|date:'Y-m-d' }}{% endif %}">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select" id="category" name="category">
+                        <option value="">Select a category</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if task.category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-between">
+                    <a href="/tasks/" class="btn btn-light"><i class="bi bi-arrow-left me-1"></i> Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4"><i class="bi bi-check-lg me-1"></i> {% if task %}Update Task{% else %}Create Task{% endif %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="tm-card p-4">
+            <h6 style="font-weight:700;margin-bottom:12px"><i class="bi bi-lightbulb me-2" style="color:var(--tm-warning)"></i>Tips</h6>
+            <ul style="font-size:.85rem;color:var(--tm-gray-500);padding-left:1.25rem" class="mb-0">
+                <li class="mb-2">Use clear, descriptive titles for easier tracking</li>
+                <li class="mb-2">Set priorities to stay focused on important tasks</li>
+                <li class="mb-2">Add due dates to never miss a deadline</li>
+                <li>Use categories to organize related tasks</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

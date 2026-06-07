@@ -1,0 +1,98 @@
+{% extends "tasks/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+    <div>
+        <h1 class="tm-page-title">Dashboard</h1>
+        <p class="tm-page-subtitle">Welcome back, {{ user.username }}. Here's your overview.</p>
+    </div>
+    <a href="/tasks/create/" class="btn btn-primary px-3"><i class="bi bi-plus-lg me-1"></i> New Task</a>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="tm-card tm-stat">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="tm-stat-label">Total Tasks</div>
+                    <div class="tm-stat-value mt-1">{{ total_tasks }}</div>
+                </div>
+                <div class="tm-stat-icon" style="background:var(--tm-primary-50);color:var(--tm-primary)"><i class="bi bi-folder2-open"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="tm-card tm-stat">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="tm-stat-label">Completed</div>
+                    <div class="tm-stat-value mt-1" style="color:var(--tm-success)">{{ completed_tasks }}</div>
+                </div>
+                <div class="tm-stat-icon" style="background:var(--tm-success-light);color:var(--tm-success)"><i class="bi bi-check-circle"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="tm-card tm-stat">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="tm-stat-label">In Progress</div>
+                    <div class="tm-stat-value mt-1" style="color:var(--tm-info)">{{ in_progress_tasks }}</div>
+                </div>
+                <div class="tm-stat-icon" style="background:var(--tm-info-light);color:var(--tm-info)"><i class="bi bi-arrow-repeat"></i></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="tm-card tm-stat">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                    <div class="tm-stat-label">Pending</div>
+                    <div class="tm-stat-value mt-1" style="color:var(--tm-warning)">{{ pending_tasks }}</div>
+                </div>
+                <div class="tm-stat-icon" style="background:var(--tm-warning-light);color:var(--tm-warning)"><i class="bi bi-hourglass-split"></i></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Tasks -->
+<div class="tm-card">
+    <div class="d-flex justify-content-between align-items-center p-3 px-4 border-bottom">
+        <h6 class="mb-0" style="font-weight:700;color:var(--tm-dark)">Recent Tasks</h6>
+        <a href="/tasks/" class="btn btn-sm btn-outline-primary">View All <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+    <div class="table-responsive">
+        <table class="table tm-table mb-0">
+            <thead>
+                <tr><th>Task</th><th>Priority</th><th>Status</th><th>Due Date</th><th></th></tr>
+            </thead>
+            <tbody>
+                {% for task in recent_tasks %}
+                <tr>
+                    <td>
+                        <div style="font-weight:600;color:var(--tm-dark)">{{ task.title }}</div>
+                        <div style="font-size:.78rem;color:var(--tm-gray-400)">{{ task.description|truncatewords:8 }}</div>
+                    </td>
+                    <td><span class="badge priority-{{ task.priority|lower }} rounded-pill px-2 py-1" style="font-size:.72rem">{{ task.priority }}</span></td>
+                    <td><span class="badge badge-{{ task.status|lower|cut:' ' }} rounded-pill px-2 py-1" style="font-size:.72rem">{{ task.get_status_display }}</span></td>
+                    <td style="font-size:.85rem;color:var(--tm-gray-500)">{{ task.due_date|date:"M d, Y" }}</td>
+                    <td><a href="/tasks/{{ task.id }}/" class="btn btn-sm btn-light py-1 px-2"><i class="bi bi-chevron-right" style="font-size:.75rem"></i></a></td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center py-5" style="color:var(--tm-gray-400)">
+                        <i class="bi bi-inbox" style="font-size:2rem"></i>
+                        <div class="mt-2">No tasks yet</div>
+                        <a href="/tasks/create/" class="btn btn-primary btn-sm mt-2"><i class="bi bi-plus-lg me-1"></i> Create Task</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

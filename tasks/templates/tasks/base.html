@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TaskManager{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --tm-primary: #2563eb;
+            --tm-primary-hover: #1d4ed8;
+            --tm-primary-light: #eff6ff;
+            --tm-primary-50: #dbeafe;
+            --tm-dark: #0f172a;
+            --tm-dark-700: #1e293b;
+            --tm-dark-600: #334155;
+            --tm-gray-500: #64748b;
+            --tm-gray-400: #94a3b8;
+            --tm-gray-200: #e2e8f0;
+            --tm-gray-100: #f1f5f9;
+            --tm-gray-50: #f8fafc;
+            --tm-success: #10b981;
+            --tm-success-light: #d1fae5;
+            --tm-warning: #f59e0b;
+            --tm-warning-light: #fef3c7;
+            --tm-danger: #ef4444;
+            --tm-danger-light: #fee2e2;
+            --tm-info: #3b82f6;
+            --tm-info-light: #dbeafe;
+            --tm-sidebar-w: 264px;
+            --tm-topbar-h: 64px;
+            --tm-radius: 12px;
+            --tm-shadow-sm: 0 1px 2px 0 rgb(0 0 0 / .05);
+            --tm-shadow: 0 1px 3px 0 rgb(0 0 0 / .1), 0 1px 2px -1px rgb(0 0 0 / .1);
+            --tm-shadow-md: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1);
+            --tm-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);
+        }
+
+        * { font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+
+        body { background: var(--tm-gray-100); color: var(--tm-dark-600); }
+
+        /* ── Sidebar ── */
+        .tm-sidebar {
+            position: fixed; top: 0; left: 0; bottom: 0;
+            width: var(--tm-sidebar-w);
+            background: var(--tm-dark);
+            z-index: 1045;
+            display: flex; flex-direction: column;
+            transition: transform .25s cubic-bezier(.4,0,.2,1);
+            overflow-y: auto;
+        }
+        .tm-sidebar-brand {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255,255,255,.07);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .tm-sidebar-brand-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: var(--tm-primary);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.1rem;
+        }
+        .tm-sidebar-brand h5 {
+            color: #fff; font-weight: 700; margin: 0; font-size: 1.1rem; letter-spacing: -.02em;
+        }
+        .tm-sidebar-section {
+            padding: 20px 24px 6px;
+            font-size: .68rem; text-transform: uppercase; letter-spacing: .1em;
+            color: rgba(148,163,184,.45); font-weight: 600;
+        }
+        .tm-sidebar .nav-link {
+            color: var(--tm-gray-400);
+            padding: 9px 24px; margin: 1px 12px;
+            border-radius: 8px; font-size: .875rem; font-weight: 500;
+            display: flex; align-items: center; gap: 10px;
+            transition: all .15s;
+        }
+        .tm-sidebar .nav-link:hover { color: #fff; background: rgba(255,255,255,.06); }
+        .tm-sidebar .nav-link.active {
+            color: #fff; background: rgba(37,99,235,.2);
+        }
+        .tm-sidebar .nav-link.active::before {
+            content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+            width: 3px; height: 20px; border-radius: 0 3px 3px 0;
+            background: var(--tm-primary);
+        }
+        .tm-sidebar .nav-link i { font-size: 1.1rem; width: 22px; text-align: center; }
+
+        /* ── Main ── */
+        .tm-main { margin-left: var(--tm-sidebar-w); min-height: 100vh; }
+
+        /* ── Topbar ── */
+        .tm-topbar {
+            height: var(--tm-topbar-h); background: #fff;
+            border-bottom: 1px solid var(--tm-gray-200);
+            padding: 0 28px;
+            display: flex; align-items: center; justify-content: space-between;
+            position: sticky; top: 0; z-index: 1030;
+            box-shadow: var(--tm-shadow-sm);
+        }
+        .tm-topbar .btn-toggle { display: none; border: none; background: none; font-size: 1.3rem; color: var(--tm-gray-500); padding: 4px; }
+        .tm-search { position: relative; }
+        .tm-search input {
+            border: 1px solid var(--tm-gray-200); border-radius: 8px;
+            padding: 8px 12px 8px 38px; width: 260px; font-size: .85rem;
+            background: var(--tm-gray-50); transition: all .2s;
+        }
+        .tm-search input:focus { border-color: var(--tm-primary); box-shadow: 0 0 0 3px rgba(37,99,235,.12); background: #fff; outline: none; }
+        .tm-search i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--tm-gray-400); font-size: .9rem; }
+        .tm-avatar {
+            width: 34px; height: 34px; border-radius: 8px;
+            background: var(--tm-primary-50); color: var(--tm-primary);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: .8rem;
+        }
+
+        /* ── Content ── */
+        .tm-content { padding: 28px; }
+        .tm-page-title { font-size: 1.5rem; font-weight: 700; color: var(--tm-dark); letter-spacing: -.02em; margin: 0; }
+        .tm-page-subtitle { font-size: .875rem; color: var(--tm-gray-500); margin: 4px 0 0; }
+
+        /* ── Cards ── */
+        .tm-card {
+            background: #fff; border: 1px solid var(--tm-gray-200);
+            border-radius: var(--tm-radius); box-shadow: var(--tm-shadow-sm);
+            transition: box-shadow .2s;
+        }
+        .tm-card:hover { box-shadow: var(--tm-shadow); }
+
+        /* ── Stat Cards ── */
+        .tm-stat { padding: 22px; position: relative; overflow: hidden; }
+        .tm-stat-icon {
+            width: 44px; height: 44px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.15rem;
+        }
+        .tm-stat-value { font-size: 1.875rem; font-weight: 800; line-height: 1; letter-spacing: -.03em; color: var(--tm-dark); }
+        .tm-stat-label { font-size: .8rem; color: var(--tm-gray-500); margin-top: 4px; font-weight: 500; }
+
+        /* ── Table ── */
+        .tm-table thead th {
+            background: var(--tm-gray-50); font-size: .75rem; text-transform: uppercase;
+            letter-spacing: .06em; color: var(--tm-gray-500); font-weight: 600;
+            padding: 12px 16px; border-bottom: 1px solid var(--tm-gray-200); border-top: none;
+        }
+        .tm-table tbody td {
+            padding: 14px 16px; vertical-align: middle;
+            border-bottom: 1px solid var(--tm-gray-100); font-size: .875rem;
+        }
+        .tm-table tbody tr:hover { background: var(--tm-gray-50); }
+        .tm-table tbody tr:last-child td { border-bottom: none; }
+
+        /* ── Badges ── */
+        .badge-completed { background: var(--tm-success-light); color: #065f46; font-weight: 600; }
+        .badge-in-progress, .badge-in_progress { background: var(--tm-info-light); color: #1e40af; font-weight: 600; }
+        .badge-pending { background: var(--tm-warning-light); color: #92400e; font-weight: 600; }
+        .badge-overdue { background: var(--tm-danger-light); color: #991b1b; font-weight: 600; }
+        .priority-high { background: var(--tm-danger-light); color: #991b1b; font-weight: 600; }
+        .priority-medium { background: #ffedd5; color: #9a3412; font-weight: 600; }
+        .priority-low { background: var(--tm-success-light); color: #065f46; font-weight: 600; }
+
+        /* ── Buttons ── */
+        .btn-primary { background: var(--tm-primary); border-color: var(--tm-primary); font-weight: 600; border-radius: 8px; }
+        .btn-primary:hover { background: var(--tm-primary-hover); border-color: var(--tm-primary-hover); }
+        .btn-outline-primary { color: var(--tm-primary); border-color: var(--tm-primary); border-radius: 8px; font-weight: 500; }
+        .btn-outline-primary:hover { background: var(--tm-primary); border-color: var(--tm-primary); }
+        .btn-light { background: var(--tm-gray-50); border: 1px solid var(--tm-gray-200); border-radius: 8px; font-weight: 500; color: var(--tm-dark-600); }
+        .btn-light:hover { background: var(--tm-gray-100); }
+
+        /* ── Forms ── */
+        .form-control, .form-select {
+            border-radius: 8px; border: 1px solid var(--tm-gray-200);
+            padding: 10px 14px; font-size: .875rem;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: var(--tm-primary);
+            box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+        }
+        .form-label { font-size: .8rem; font-weight: 600; color: var(--tm-dark-600); margin-bottom: 6px; }
+
+        /* ── Auth ── */
+        .tm-auth-wrapper {
+            min-height: 100vh; display: flex; align-items: center; justify-content: center;
+            background: linear-gradient(135deg, var(--tm-dark) 0%, #0c1222 50%, #0f172a 100%);
+            position: relative;
+        }
+        .tm-auth-wrapper::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at 30% 50%, rgba(37,99,235,.08) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 50%, rgba(37,99,235,.05) 0%, transparent 50%);
+        }
+        .tm-auth-card {
+            background: #fff; border-radius: 16px; width: 100%; max-width: 420px;
+            padding: 40px; box-shadow: var(--tm-shadow-lg); position: relative; z-index: 1;
+        }
+        .tm-auth-brand {
+            display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 32px;
+        }
+        .tm-auth-brand-icon {
+            width: 40px; height: 40px; border-radius: 10px; background: var(--tm-primary);
+            display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.2rem;
+        }
+        .tm-auth-brand h4 { margin: 0; font-weight: 700; color: var(--tm-dark); letter-spacing: -.02em; }
+
+        /* ── Modal ── */
+        .modal-content { border: none; border-radius: 16px; box-shadow: var(--tm-shadow-lg); }
+
+        /* ── Responsive ── */
+        @media (max-width: 991.98px) {
+            .tm-sidebar { transform: translateX(-100%); }
+            .tm-sidebar.show { transform: translateX(0); }
+            .tm-main { margin-left: 0; }
+            .tm-topbar .btn-toggle { display: inline-flex; }
+        }
+        .tm-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 1040;
+            display: none; backdrop-filter: blur(2px);
+        }
+        .tm-overlay.show { display: block; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% block body %}
+    <div class="tm-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="tm-sidebar" id="sidebar">
+        <div class="tm-sidebar-brand">
+            <div class="tm-sidebar-brand-icon"><i class="bi bi-check2-square"></i></div>
+            <h5>TaskManager</h5>
+        </div>
+        <div class="tm-sidebar-section">Menu</div>
+        <ul class="nav flex-column">
+            <li class="nav-item position-relative">
+                <a class="nav-link {% block nav_dashboard %}{% endblock %}" href="/dashboard/">
+                    <i class="bi bi-grid-1x2-fill"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item position-relative">
+                <a class="nav-link {% block nav_tasks %}{% endblock %}" href="/tasks/">
+                    <i class="bi bi-list-check"></i> Tasks
+                </a>
+            </li>
+            <li class="nav-item position-relative">
+                <a class="nav-link {% block nav_create %}{% endblock %}" href="/tasks/create/">
+                    <i class="bi bi-plus-square"></i> Create Task
+                </a>
+            </li>
+        </ul>
+        <div class="tm-sidebar-section mt-2">Filters</div>
+        <ul class="nav flex-column">
+            <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-circle-fill text-danger" style="font-size:.45rem"></i> High Priority</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-circle-fill text-warning" style="font-size:.45rem"></i> Medium Priority</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-circle-fill text-success" style="font-size:.45rem"></i> Low Priority</a></li>
+        </ul>
+        <div class="mt-auto p-3 border-top" style="border-color:rgba(255,255,255,.07)!important">
+            <div class="d-flex align-items-center gap-2 px-2">
+                <div class="tm-avatar" style="width:30px;height:30px;font-size:.7rem;border-radius:8px">
+                    {{ user.username|first|upper }}
+                </div>
+                <div class="flex-grow-1">
+                    <div style="font-size:.8rem;font-weight:600;color:#fff">{{ user.username }}</div>
+                </div>
+                <a href="/logout/" class="text-decoration-none" style="color:var(--tm-gray-400);font-size:.9rem" title="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="tm-main">
+        <header class="tm-topbar">
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn-toggle" onclick="toggleSidebar()"><i class="bi bi-list"></i></button>
+                <div class="tm-search d-none d-md-block">
+                    <i class="bi bi-search"></i>
+                    <input type="text" placeholder="Search tasks…">
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-sm position-relative" style="border:none;background:none">
+                    <i class="bi bi-bell" style="font-size:1.15rem;color:var(--tm-gray-500)"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:.55rem">3</span>
+                </button>
+                <div class="dropdown">
+                    <a class="d-flex align-items-center gap-2 text-decoration-none dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <div class="tm-avatar">{{ user.username|first|upper }}</div>
+                        <span class="d-none d-md-inline" style="font-size:.85rem;font-weight:600;color:var(--tm-dark)">{{ user.username }}</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" style="border-radius:10px;border:1px solid var(--tm-gray-200);box-shadow:var(--tm-shadow-md)">
+                        <li><a class="dropdown-item py-2" href="#"><i class="bi bi-person me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item py-2" href="#"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item py-2 text-danger" href="/logout/"><i class="bi bi-box-arrow-left me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+        <main class="tm-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    {% endblock %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar(){document.getElementById('sidebar').classList.toggle('show');document.getElementById('overlay').classList.toggle('show')}
+        function closeSidebar(){document.getElementById('sidebar').classList.remove('show');document.getElementById('overlay').classList.remove('show')}
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

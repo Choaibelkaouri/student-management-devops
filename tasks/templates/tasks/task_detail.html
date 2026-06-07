@@ -1,0 +1,111 @@
+{% extends "tasks/base.html" %}
+{% block title %}{{ task.title }}{% endblock %}
+{% block nav_tasks %}active{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2" style="font-size:.85rem">
+            <li class="breadcrumb-item"><a href="/tasks/" style="color:var(--tm-primary);text-decoration:none">Tasks</a></li>
+            <li class="breadcrumb-item active">{{ task.title }}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="tm-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+                <div>
+                    <h4 style="font-weight:700;color:var(--tm-dark);margin-bottom:8px">{{ task.title }}</h4>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <span class="badge badge-{{ task.status_class }} rounded-pill px-2 py-1" style="font-size:.72rem">{{ task.get_status_display }}</span>
+                        <span class="badge priority-{{ task.priority|lower }} rounded-pill px-2 py-1" style="font-size:.72rem">{{ task.priority }} Priority</span>
+                        {% if task.category %}
+                        <span class="badge rounded-pill px-2 py-1" style="font-size:.72rem;background:var(--tm-gray-100);color:var(--tm-dark-600)"><i class="bi bi-tag me-1"></i>{{ task.category.name }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <a href="/tasks/{{ task.id }}/edit/" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil me-1"></i> Edit</a>
+                    <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal"><i class="bi bi-trash me-1"></i> Delete</button>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="mb-4">
+                <h6 style="font-weight:700;font-size:.9rem;color:var(--tm-gray-500);margin-bottom:8px"><i class="bi bi-text-paragraph me-1"></i> Description</h6>
+                <div style="color:var(--tm-dark-600);line-height:1.7;font-size:.95rem">
+                    {% if task.description %}
+                        {{ task.description|linebreaks }}
+                    {% else %}
+                        <span style="color:var(--tm-gray-400);font-style:italic">No description provided</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="tm-card p-4 mb-4">
+            <h6 style="font-weight:700;margin-bottom:16px">Task Details</h6>
+            <div class="mb-3">
+                <div style="font-size:.75rem;color:var(--tm-gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Status</div>
+                <span class="badge badge-{{ task.status_class }} rounded-pill px-2 py-1">{{ task.get_status_display }}</span>
+            </div>
+            <div class="mb-3">
+                <div style="font-size:.75rem;color:var(--tm-gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Priority</div>
+                <span class="badge priority-{{ task.priority|lower }} rounded-pill px-2 py-1">{{ task.priority }}</span>
+            </div>
+            <div class="mb-3">
+                <div style="font-size:.75rem;color:var(--tm-gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Due Date</div>
+                <div style="font-size:.9rem;color:var(--tm-dark)"><i class="bi bi-calendar3 me-1"></i> {% if task.due_date %}{{ task.due_date|date:"F d, Y" }}{% else %}Not set{% endif %}</div>
+            </div>
+            <hr>
+            <div class="mb-3">
+                <div style="font-size:.75rem;color:var(--tm-gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Created by</div>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="tm-avatar" style="width:28px;height:28px;font-size:.7rem">{{ task.user.username|first|upper }}</div>
+                    <span style="font-size:.9rem;color:var(--tm-dark)">{{ task.user.username }}</span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <div style="font-size:.75rem;color:var(--tm-gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Created</div>
+                <div style="font-size:.9rem;color:var(--tm-gray-500)">{{ task.created_at|date:"F d, Y H:i" }}</div>
+            </div>
+            <div>
+                <div style="font-size:.75rem;color:var(--tm-gray-400);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Last Updated</div>
+                <div style="font-size:.9rem;color:var(--tm-gray-500)">{{ task.updated_at|date:"F d, Y H:i" }}</div>
+            </div>
+        </div>
+
+        <a href="/tasks/" class="btn btn-light w-100"><i class="bi bi-arrow-left me-1"></i> Back to Tasks</a>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title" style="font-weight:700">Delete Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div style="width:64px;height:64px;border-radius:50%;background:var(--tm-danger-light);display:inline-flex;align-items:center;justify-content:center;margin-bottom:.75rem">
+                    <i class="bi bi-exclamation-triangle" style="font-size:1.5rem;color:var(--tm-danger)"></i>
+                </div>
+                <p style="color:var(--tm-gray-500)">Are you sure you want to delete <strong style="color:var(--tm-dark)">{{ task.title }}</strong>? This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="/tasks/{{ task.id }}/delete/">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i> Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

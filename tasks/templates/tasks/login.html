@@ -1,0 +1,53 @@
+{% extends "tasks/base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block body %}
+<div class="tm-auth-wrapper">
+    <div class="tm-auth-card">
+        <div class="tm-auth-brand">
+            <div class="tm-auth-brand-icon"><i class="bi bi-check2-square"></i></div>
+            <h4>TaskManager</h4>
+        </div>
+        <h5 class="text-center mb-1" style="font-weight:700;color:var(--tm-dark)">Welcome back</h5>
+        <p class="text-center mb-4" style="color:var(--tm-gray-500);font-size:.875rem">Sign in to your account to continue</p>
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" style="font-size:.85rem;border-radius:10px">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent" style="border-radius:8px 0 0 8px;border-right:none"><i class="bi bi-person text-muted"></i></span>
+                    <input type="text" name="username" class="form-control" placeholder="Enter your username" required style="border-left:none">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent" style="border-radius:8px 0 0 8px;border-right:none"><i class="bi bi-lock text-muted"></i></span>
+                    <input type="password" name="password" class="form-control" placeholder="Enter your password" required style="border-left:none">
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="remember">
+                    <label class="form-check-label" for="remember" style="font-size:.8rem;color:var(--tm-gray-500)">Remember me</label>
+                </div>
+                <a href="#" style="font-size:.8rem;color:var(--tm-primary);text-decoration:none;font-weight:500">Forgot password?</a>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 py-2" style="font-size:.9rem">Sign In</button>
+        </form>
+        <p class="text-center mt-4 mb-0" style="font-size:.85rem;color:var(--tm-gray-500)">
+            Don't have an account? <a href="/register/" style="color:var(--tm-primary);text-decoration:none;font-weight:600">Sign up</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
